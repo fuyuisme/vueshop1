@@ -10,7 +10,7 @@ import './assets/global.css'
 Vue.use(ElementUI)
 Vue.use(VueAxios, axios)
 
-// 设置接口的基地址
+// 设置基地址（接口）的基地址
 Vue.axios.defaults.baseURL = 'http://127.0.0.1:11333/api/private/v1'
 Vue.config.productionTip = false
 

@@ -2,21 +2,55 @@
   <div class="login">
     <div class="login-box">
       <img class="logo" src="../assets/logo.png" alt="">
-      <el-form
-        class="demo-ruleForm"
-      >
-        <el-form-item>
-          <el-input type="password"></el-input>
-          <el-input type="password"></el-input>
-          <el-button type="primary" >提交</el-button>
-          <el-button>重置</el-button>
+      <el-form ref="loginForm" :model="loginForm" :rules="loginRule">
+        <el-form-item prop="username">
+          <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid" placeholder="账号"></el-input>
         </el-form-item>
+        <el-form-item prop="password">
+          <el-input @keyup.enter.native="loginSubmit" v-model="loginForm.password" prefix-icon="el-icon-lock" type="password" placeholder="密码"></el-input>
+        </el-form-item>
+          <el-button  @click="loginSubmit" type="primary">登录</el-button>
+          <el-button>重置</el-button>
       </el-form>
     </div>
   </div>
 </template>
 <script>
-export default {}
+export default {
+  data () {
+    return {
+      loginForm: {
+        username: '',
+        password: ''
+      },
+      loginRule: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    loginSubmit () {
+      // 先验证表单验证成功再调用接口
+      this.$refs.loginForm.validate(async ok => {
+        if (ok) {
+          const { data: res } = await this.axios.post('/login', this.loginForm)
+          if (res.meta.status !== 200) return this.$message.error('账号或密码输入有误')
+          // 保存令牌到本地 关闭浏览器需要重新登录
+          sessionStorage.setItem('token', res.data.token)
+          this.$message.success('登录成功')
+          this.$router.push('/')
+        }
+      })
+    }
+  }
+}
 </script>
 <style>
 .login {
