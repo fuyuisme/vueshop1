@@ -5,7 +5,16 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    /* 最小也要1024px */
+    min-width: 1024px;
 }
 .my-active-class{
     color: #F00;
   }
+/* 为所有页面翻页组件添加上边距 */
+.el-pagination {
+    margin-top: 15px；
+}
+.el-breadcrumb {
+    margin-bottom: 15px；
+}

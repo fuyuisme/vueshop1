@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
 
 Vue.use(Router)
 
@@ -12,8 +11,50 @@ const r = new Router({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      redirect: '/welcome'
+    },
+    {
+      path: '/home',
+      component: () => import('./views/Home.vue'),
+      // 右侧页面
+      children: [
+        {
+          path: '/welcome',
+          component: () => import('./views/Welcome.vue')
+        },
+        {
+          path: '/users',
+          component: () => import('./views/User.vue')
+        },
+        {
+          path: '/roles',
+          component: () => import('./views/Roles.vue')
+        },
+        {
+          path: '/rights',
+          component: () => import('./views/Rights.vue')
+        },
+        {
+          path: '/categories',
+          component: () => import('./views/Categories.vue')
+        },
+        {
+          path: '/goods',
+          component: () => import('./views/Goods.vue')
+        },
+        {
+          path: '/params',
+          component: () => import('./views/Params.vue')
+        },
+        {
+          path: '/orders',
+          component: () => import('./views/Orders.vue')
+        },
+        {
+          path: '/reports',
+          component: () => import('./views/Reports.vue')
+        }
+      ]
     },
     {
       path: '/login',
@@ -30,7 +71,7 @@ const r = new Router({
 // next(error) 触发错误
 // next(false) 阻止跳转
 r.beforeEach((to, from, next) => {
-  if (to.path == '/login') return next()
+  if (to.path === '/login') return next()
   // 取出令牌
   let token = sessionStorage.getItem('token')
   if (token) return next()

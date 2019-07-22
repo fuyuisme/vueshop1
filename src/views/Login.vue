@@ -45,7 +45,7 @@ export default {
           // 保存令牌到本地 关闭浏览器需要重新登录
           sessionStorage.setItem('token', res.data.token)
           this.$message.success('登录成功')
-          this.$router.push('/')
+          this.$router.push('/home')
         }
       })
     }
