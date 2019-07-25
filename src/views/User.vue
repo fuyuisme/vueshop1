@@ -6,6 +6,17 @@
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card>
+      <el-row :gutter="15" class="search-box">
+        <el-col :span="10">
+          <!-- 第三方组件要用.native -->
+          <el-input @keyup.enter.native="queryInfo.query=searchKey" :v-model="searchKey" placeholder="请输入搜索关键字" v-model="searchKey">
+            <el-button slot="append" icon="el-icon-search"></el-button>
+          </el-input>
+        </el-col>
+        <el-col :span="4">
+        <el-button type="primary">添加新用户</el-button>
+        </el-col>
+      </el-row>
     <el-table
     :data="userList"
     border
@@ -31,6 +42,20 @@
         <el-table-column
           prop="mg_state"
           label="状态">
+          <template slot-scope="data">
+            <!-- data.row当前这行数据 是对象类型
+            data.$index当前数据的下标
+             -->
+              <!-- {{ data.row }}
+              {{ data.$index }} -->
+              <!-- 添加开关组件并和每行的mg_state绑定 -->
+              <el-switch
+              @change="changState($event,data.row)"
+                v-model="data.row.mg_state"
+                active-color="#399bfb"
+                >
+              </el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="mg_state"
@@ -47,54 +72,37 @@
       :total="total">
     </el-pagination>
     </el-card>
+    <!-- 添加用户的表单 -->
+    <el-dialog title="添加用户" :visible.sync="addUserDialog">
+      <el-form :model="addUserfrom" :rules="addUserRules">
+        <el-form-item prop="username" label="用户名" label-width="80px">
+          <el-input v-model="addUserfrom.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="password" label="密码" label-width="80px">
+          <el-input type="password" v-model="addUserfrom.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="email" label="邮箱" label-width="80px">
+          <el-input v-model="addUserfrom.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="mobile" label="手机号" label-width="80px">
+          <el-input v-model="addUserfrom.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import User from './User.js'
 export default {
-  // 页面中要使用的数据要在data()中定义
-  data () {
-    return {
-      userList: [], // 用户列表
-      queryInfo: {
-        query: '',
-        pagenum: 1,
-        pagesize: 2
-      },
-      total: 0 // 总的记录数
-    }
-  },
-  // watch是对象  对象后要用：
-  watch: {
-    queryInfo: {
-      deep: true,
-      handler () {
-        this.getData()
-      }
-    }
-  },
-  // methods是对象 对象后要用：
-  methods: {
-    async getData () {
-      let { data: res } = await this.axios.get('/users', { params: this.queryInfo })
-      // 保存用户列表
-      if (res.meta.status !== 200) return this.$message.error('获取用户列表失败')
-      this.userList = res.data.users
-      this.total = res.data.total
-      // console.log(res)
-    },
-    // 当每页条数改变时触发
-    handleSizeChange (val) {
-      // 更新当前每页条数
-      this.queryInfo.pagesize = val
-    },
-    handleCurrentChange (val) {
-      // 改变当前
-      this.queryInfo.pagenum = val
-    }
-  },
-  // 获取页面初始函数
-  created () {
-    this.getData()
-  }
+  mixins: [User]
 }
 </script>
+<style>
+  .home .search-box{
+    margin-bottom: 15px;
+  }
+</style>

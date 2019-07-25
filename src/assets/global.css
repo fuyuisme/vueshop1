@@ -13,8 +13,8 @@ body {
   }
 /* 为所有页面翻页组件添加上边距 */
 .el-pagination {
-    margin-top: 15px；
+    margin-top: 15px;
 }
 .el-breadcrumb {
-    margin-bottom: 15px；
+    margin-bottom: 15px;
 }
