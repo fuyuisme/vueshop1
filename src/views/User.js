@@ -16,16 +16,38 @@ export default {
       let exists = await this.axios.get('/users/exists/' + value)
       console.log(exists)
       // 判断有没有数据有就报错没有就通过
-      if (exists.data.mate.status === 200) {
+      if (exists.data.meta.status === 200) {
         callback(new Error('用户名已经存在'))
       } else {
         callback()
       }
     }
     return {
-      addUserDialog: true,
+      // 控制修改用户的表单是否显示
+      editUserDialog: false,
+      // 修改用户的表单
+      editUserFrom: {
+        id: '',
+        username: '',
+        email: '',
+        mobile: ''
+      },
+      editUserRules: {
+        email: [
+          { required: true, message: '邮箱不能为空', trigger: 'blur' },
+          // 邮箱验证
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+        ],
+        mobile: [
+          { required: true, message: '手机号不能为空', trigger: 'blur' },
+          // 自定义手机号验证
+          { pattern: /^1[3456789]\d{9}$/, message: '手机格式不正确', trigger: ['blur', 'change'] }
+        ]
+      },
+      // 控制添加用户的表单是否显示
+      addUserDialog: false,
       // 添加用户的表单
-      addUserfrom: {
+      addUserFrom: {
         username: '',
         password: '',
         email: '',
@@ -34,15 +56,18 @@ export default {
       addUserRules: {
         username: [
           { required: true, message: '用户名不能为空', trigger: 'blur' },
+          // 唯一用户名规则
           { validator: validateNameExists, message: '用户名已经存在', trigger: 'blur' }
         ],
         password: { required: true, message: '密码不能为空', trigger: 'blur' },
         email: [
           { required: true, message: '邮箱不能为空', trigger: 'blur' },
+          // 邮箱验证
           { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
         ],
         mobile: [
           { required: true, message: '手机号不能为空', trigger: 'blur' },
+          // 自定义手机号验证
           { pattern: /^1[3456789]\d{9}$/, message: '手机格式不正确', trigger: ['blur', 'change'] }
         ]
       },
@@ -95,9 +120,75 @@ export default {
       // 更新当前每页条数
       this.queryInfo.pagesize = val
     },
+    // 改变当前
     handleCurrentChange (val) {
-      // 改变当前
       this.queryInfo.pagenum = val
+    },
+    add () {
+      // 先验证表单
+      this.$refs.addUserRef.validate(async c => {
+        if (c) {
+          const res = await this.axios.post('/users', this.addUserFrom)
+          console.log(res)
+          if (res.data.meta.status === 201) {
+            this.$message.success('添加成功')
+            // 重新获取数据
+            this.getData()
+            // 关闭框
+            this.addUserDialog = false
+          }
+        }
+      })
+    },
+    edit () {
+      // 先验证表单
+      this.$refs.editUserRef.validate(async c => {
+        if (c) {
+          const res = await this.axios.put(`/users/${this.editUserFrom.id}`, this.editUserFrom)
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            this.$message.success('更新成功')
+            // 重新获取数据
+            this.getData()
+            // 关闭框
+            this.editUserDialog = false
+          }
+        }
+      })
+    },
+    del (id) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.axios.delete(`/users/${id}`)
+        if (res.data.meta.status === 200) {
+          console.log(res)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          // 重新加载数据
+          this.getData()
+        } else {
+          this.$message.error('操作失败，失败原因:' + res.data.meta.msg)
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 点击修改时显示表单
+    showEditForm (data) {
+      // 把要修改的数据绑定到表单中
+      this.editUserFrom.id = data.id
+      this.editUserFrom.username = data.username
+      this.editUserFrom.email = data.email
+      this.editUserFrom.mobile = data.mobile
+      this.editUserDialog = true
     }
   },
   // 获取页面初始函数

@@ -14,7 +14,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-        <el-button type="primary">添加新用户</el-button>
+        <el-button @click="addUserDialog=true" type="primary">添加新用户</el-button>
         </el-col>
       </el-row>
     <el-table
@@ -60,6 +60,17 @@
         <el-table-column
           prop="mg_state"
           label="操作">
+          <template slot-scope="data">
+            <el-tooltip :enterable="false" class="item" effect="dark" content="修改" placement="top">
+            <el-button @click="showEditForm(data.row)" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+            </el-tooltip>
+            <el-tooltip :enterable="false" class="item" effect="dark" content="删除" placement="top">
+            <el-button @click="del(data.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
+            </el-tooltip>
+            <el-tooltip :enterable="false" class="item" effect="dark" content="分配角色" placement="top">
+            <el-button size="mini" type="warning" icon="el-icon-s-tools" circle></el-button>
+            </el-tooltip>
+          </template>
         </el-table-column>
       </el-table>
        <el-pagination
@@ -72,25 +83,46 @@
       :total="total">
     </el-pagination>
     </el-card>
+
     <!-- 添加用户的表单 -->
-    <el-dialog title="添加用户" :visible.sync="addUserDialog">
-      <el-form :model="addUserfrom" :rules="addUserRules">
+    <el-dialog @closed="$refs.addUserRef.resetFields()" title="添加用户" :visible.sync="addUserDialog">
+      <el-form ref="addUserRef" :model="addUserFrom" :rules="addUserRules">
         <el-form-item prop="username" label="用户名" label-width="80px">
-          <el-input v-model="addUserfrom.username" autocomplete="off"></el-input>
+          <el-input v-model="addUserFrom.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="password" label="密码" label-width="80px">
-          <el-input type="password" v-model="addUserfrom.password" autocomplete="off"></el-input>
+          <el-input type="password" v-model="addUserFrom.password" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="email" label="邮箱" label-width="80px">
-          <el-input v-model="addUserfrom.email" autocomplete="off"></el-input>
+          <el-input v-model="addUserFrom.email" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="mobile" label="手机号" label-width="80px">
-          <el-input v-model="addUserfrom.mobile" autocomplete="off"></el-input>
+          <el-input v-model="addUserFrom.mobile" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button @click="addUserDialog = false">取 消</el-button>
+        <el-button type="primary" @click="add">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 修改用户的表单 -->
+    <el-dialog @closed="$refs.editUserRef.resetFields()" title="修改用户信息" :visible.sync="editUserDialog">
+      <el-form ref="editUserRef" :model="editUserFrom" :rules="editUserRules">
+        <el-form-item prop="username" label="用户名" label-width="80px">
+          <el-input v-model="editUserFrom.username" autocomplete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item prop="email" label="邮箱" label-width="80px">
+          <el-input v-model="editUserFrom.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="mobile" label="手机号" label-width="80px">
+          <el-input v-model="editUserFrom.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-input type="hidden" v-model="editUserFrom.id"></el-input>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editUserDialog = false">取 消</el-button>
+        <el-button type="primary" @click="edit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
